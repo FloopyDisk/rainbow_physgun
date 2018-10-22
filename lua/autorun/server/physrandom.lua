@@ -1,59 +1,54 @@
-AdminMode = 0 -- 1 is to make it only for admins, 0 is to make it for everyone.
-function physrandom() -- Create a function named physrandom
+AdminMode = 0 -- Is this for admins only? 1 is yes, 0 is no.
+
+H, S, L = 0, 190, 10
+function physrandom() -- Create the function
     for k, v in pairs(player.GetAll()) do -- Get all players
-        function randomize(v) -- Create a function named physrandom
-            local f = math.random(13) -- creates a local variable that randomizes from 1 to 13
-            local col = v:GetInfo( "cl_weaponcolor" ) -- Get's the current weapon color.
-            v:SetWeaponColor( Vector( col ) ) -- Sets the weapons color
-            if f == 1 then  
-                v:ConCommand("cl_weaponcolor 255 0 0")
+        function randomize(v) -- Create another function that randomizes the players physgun
+			HSLtoRGB(H,S,L);
+            local col = v:GetInfo( "cl_weaponcolor" )
+            v:SetWeaponColor( Vector( col ) )
+			v:ConCommand("cl_weaponcolor ".. R .." ".. G .." ".. B)
+			H = H+1
+			if H > 239 then H=0 end
+		end
+        if AdminMode == 1 then -- If AdminMode is set to 1, then make it for the available groups
+            if v:IsUserGroup("admin") or v:IsUserGroup("superadmin") or v:IsUserGroup("operator") or v:IsUserGroup("moderator") or v:IsUserGroup("mod") or v:IsUserGroup("tmod") then
+				randomize(v) -- Run the randomize function.
             end
-            if f == 2 then
-                v:ConCommand("cl_weaponcolor 252 105 0")
-            end
-            if f == 3 then
-                v:ConCommand("cl_weaponcolor 239 252 0")
-            end
-            if f == 4 then
-                v:ConCommand("cl_weaponcolor 0 255 0")
-            end
-            if f == 5 then
-                v:ConCommand("cl_weaponcolor 0 0 255")
-            end
-            if f == 6 then
-                v:ConCommand("cl_weaponcolor 34 0 93")
-            end
-            if f == 7 then
-                v:ConCommand("cl_weaponcolor 27 0 27")
-            end
-            if f == 8 then
-                v:ConCommand("cl_weaponcolor 5 61 13")
-            end
-            if f == 9 then
-                v:ConCommand("cl_weaponcolor 0 255 213")
-            end
-            if f == 10 then
-                v:ConCommand("cl_weaponcolor 0 0 0")
-            end
-            if f == 11 then
-                v:ConCommand("cl_weaponcolor 255 255 255")
-            end
-            if f == 12 then
-                v:ConCommand("cl_weaponcolor 177 213 57")
-            end
-            if f == 13 then
-                v:ConCommand("cl_weaponcolor 255 88 0")
-            end
-        end
-        if AdminMode == 1 then -- If the variable AdminMode is set to one, Make it available to only admins.
-        -- i added more user groups and put all in one line.
-            if v:IsUserGroup("admin") or v:IsUserGroup("operator") or v:IsUserGroup("superadmin") or v:IsUserGroup("mod") or v:IsUserGroup("moderator") or v:IsUserGroup("tmod") or v:IsUserGroup("founder") then
-            randomize(v)
-            end
-        end
-        if AdminMode != 1 then -- If the variable AdminMode is not set to one, make it available to everybody
-        randomize(v)
-        end
-    end
+		elseif AdminMode == 0 then randomize(v) -- If admin mode is 0, make it available to all players.
+		else randomize(v) end -- If AdminMode is some other value we dont give a crap about, just let it randomize anyway.
+	end
 end
-hook.Add("Initialize", "Initialize.physrandom", timer.Create("wait", .41, 0, physrandom))
+
+function HSLtoRGB(H, S, L) -- This one is kind of self explainitory.
+    H, S, L = math.min(240, H), math.min(240, S), math.min(240, L)
+    H, S, L = math.max(0, H), math.max(0, S), math.max(0, L)
+    R, G, B = 0, 0, 0
+    if H < 80 then
+        R = math.min(255, 255 * (80 - H) / 40)
+    elseif H > 160 then
+        R = math.min(255, 255 * (H - 160) / 40)
+    end
+    if H < 160 then
+        G = math.min(255, 255 * (80 - math.abs(H - 80)) / 40)
+    end
+    if H > 80 then
+        B = math.min(255, 255 * (80 - math.abs(H - 160)) / 40)
+    end
+    if S < 240 then
+        k = S / 240
+        R, G, B = R*k, G*k, B*k
+        k = 128 * (240 - S) / 240
+        R, G, B = R+k, G+k, B+k
+    end
+    k = (120 - math.abs(L - 120)) / 120
+    R, G, B = R*k, G*k, B*k
+    if L > 120 then
+        k = 256 * (L - 120) / 120
+        R, G, B = R+k, G+k, B+k
+    end
+    return R, G, B
+end
+
+local phystimer_time = .20 -- Set this to anything you want.
+hook.Add("Initialize", "Initialize.physrandom", timer.Create("wait", phystimer_time, 0, physrandom)) -- Create the timer for when the player spawns in. 
