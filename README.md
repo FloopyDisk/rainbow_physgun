@@ -1,2 +1,4 @@
-# rainbow_physgun
-All 100% of the credit goes to Ekuland. Original Link: https://steamcommunity.com/sharedfiles/filedetails/?id=294607278
+# Smooth Rainbow Physguns
+All 100% of the credit goes to Ekuland. All i did was modify the if statement for the User Groups and add some comments.
+
+Original Link: https://steamcommunity.com/sharedfiles/filedetails/?id=574850322
